@@ -67,4 +67,4 @@ Run the tests: `cd server && npm test`
 See `server/.env.example` and `client/.env.example`.
 
 ## Author
-B Vishal, [
+B Vishal.
