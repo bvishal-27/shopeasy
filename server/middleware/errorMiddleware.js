@@ -42,6 +42,22 @@ export const errorHandler = (err, req, res, next) => {
     statusCode = 400;
   }
 
+  // Broken or oversized JSON body
+  if (err.type === "entity.parse.failed") {
+    statusCode = 400;
+    message = "Invalid JSON in request body";
+  }
+  if (err.type === "entity.too.large") {
+    statusCode = 413;
+    message = "Request body is too large";
+  }
+
+  // Unexpected errors: log them, and don't leak details to users in production
+  if (statusCode === 500) {
+    console.error(err);
+    if (process.env.NODE_ENV === "production") message = "Internal server error";
+  }
+
   res.status(statusCode).json({
     success: false,
     message,

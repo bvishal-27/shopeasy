@@ -11,6 +11,7 @@ import {
 } from "../controllers/productController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 import upload from "../middleware/uploadMiddleware.js";
+import { reviewRules, validate } from "../middleware/validators.js";
 
 const router = express.Router();
 
@@ -29,6 +30,6 @@ router
   .delete(protect, admin, deleteProduct);
 
 router.delete("/:id/images", protect, admin, deleteProductImage);
-router.post("/:id/reviews", protect, createProductReview);
+router.post("/:id/reviews", protect, reviewRules, validate, createProductReview);
 
 export default router;

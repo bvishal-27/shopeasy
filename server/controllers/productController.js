@@ -4,6 +4,8 @@ import {
   uploadToCloudinary,
   deleteFromCloudinary,
 } from "../utils/uploadToCloudinary.js";
+// Escapes characters that have a special meaning in a regular expression
+const escapeRegex = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 // @desc    Get products (search, filter, sort, paginate)
 // @route   GET /api/products?keyword=&category=&minPrice=&maxPrice=&sort=&page=&limit=
@@ -13,14 +15,14 @@ export const getProducts = asyncHandler(async (req, res) => {
 
   const query = {};
 
-  if (keyword) {
-    query.$text = { $search: keyword };
+    if (keyword) {
+    query.$text = { $search: String(keyword) };
   }
   if (category) {
-    query.category = { $regex: `^${category}$`, $options: "i" };
+    query.category = { $regex: `^${escapeRegex(category)}$`, $options: "i" };
   }
   if (brand) {
-    query.brand = { $regex: `^${brand}$`, $options: "i" };
+    query.brand = { $regex: `^${escapeRegex(brand)}$`, $options: "i" };
   }
   if (minPrice || maxPrice) {
     query.price = {};

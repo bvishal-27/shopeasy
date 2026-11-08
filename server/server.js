@@ -1,56 +1,29 @@
-import "dotenv/config";
-import express from "express";
-import cors from "cors";
-import morgan from "morgan";
+import "dotenv/config"; // must stay first: loads .env before anything else
+import "./config/validateEnv.js"; // exits early if a variable is missing
+import mongoose from "mongoose";
 import connectDB from "./config/db.js";
-import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
-import cartRoutes from "./routes/cartRoutes.js";
-import orderRoutes from "./routes/orderRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import productRoutes from "./routes/productRoutes.js";
-import paymentRoutes from "./routes/paymentRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
-// Load environment variables
+import app from "./app.js";
 
-// Connect to database
-connectDB();
-
-const app = express();
-
-// Middleware
-app.use(cors());
-app.use(express.json()); // parse JSON request bodies
-app.use(express.urlencoded({ extended: true }));
-
-
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
-
-// Health-check route
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "ShopEase API is running",
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/cart", cartRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/payment", paymentRoutes);
-app.use("/api/admin", adminRoutes);
-// Error handlers (must come AFTER all routes)
-app.use(notFound);
-app.use(errorHandler);
+await connectDB();
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+});
+
+// Render sends SIGTERM on every deploy: finish current requests, then exit
+const shutdown = (signal) => {
+  console.log(`${signal} received, shutting down`);
+  server.close(async () => {
+    await mongoose.connection.close();
+    process.exit(0);
+  });
+};
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled rejection:", err);
+  shutdown("unhandledRejection");
 });
