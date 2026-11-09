@@ -216,4 +216,4 @@ Render's free tier blocks outbound SMTP, so production email goes through an HTT
 ## Author
 
 **Vishal Bhangare**
-[GitHub](https://github.com/bvishal-27) · [LinkedIn](https://www.linkedin.com/in/your-profile)
+[GitHub](https://github.com/bvishal-27) · [LinkedIn](www.linkedin.com/in/b-vishal27)
